@@ -1,0 +1,26 @@
+---
+  - name: JUNK MAIL BUILD
+    hosts: localhost
+    gather_facts: no
+
+    tasks:
+      - name: TASK 1 - IMPORT CUSTOMER DATA
+        include_vars:
+          file: ./customer_data.yml
+          name: cust_data
+
+      - name: test dict debug
+        debug: msg="{{ item.key }}"
+        loop: "{{ lookup('dict', cust_data['customers']) }}"
+
+      - name: TASK 2 - CREATE JUNK MAIL FILES
+        file:
+          path: ./{{ item.key }}.txt
+          state: touch
+        loop: "{{ lookup('dict', cust_data['customers']) }}"
+
+      - name: TASK 3 - BUILD JUNK MAIL FROM TEMPLATE
+        template:
+          src: ./junk_mail.j2
+          dest: ./{{ item.key }}.txt
+        loop: "{{ lookup('dict', cust_data['customers']) }}"
